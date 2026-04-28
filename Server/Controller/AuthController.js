@@ -14,25 +14,27 @@ export const register = async (req, res) => {
 
         const existingEmail = await user.findOne({ email });
         if (existingEmail) {
-            return res.json({ success: false, message: "The user already exists" })
+            return res.status(409).json({ success: false, message: "The user already exists" })
         }
 
         if (!validEmail(email)) {
-            return res.json({ success: false, message: "Invalid email" })
+            return res.status(400).json({ success: false, message: "Invalid email" })
         }
 
-        const hashedPass = hashPassword(password);
+        const hashedPass = await hashPassword(password);
 
-        await new user({
-            username, email, password: hashedPass
-        });
+        const newUser = await user.create({
+            username, 
+            email,
+            password: hashedPass
+        })
 
-        const token = signToken(user._id);
+        const token = signToken(newUser._id);
 
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_EV === "development" ? 'none' : 'strict',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
@@ -42,8 +44,8 @@ export const register = async (req, res) => {
         })
 
     } catch (error) {
-        res.json({ success: false, message: error.message })
         console.log("Something went wrong on register", error)
+        return res.json({ success: false, message: error })
     }
 }
 
@@ -51,52 +53,53 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.json({
+        return res.status(400).json({
             success: false,
-            message: "All fields are required"
+            message: "All fields are required",
         });
     }
+
     try {
+        const isUser = await user.findOne({ email });
 
-        const user =await user.findOne({ email });
-
-        if (!user) {
-            return res.json({
-                success: false,
-                message: "Invalid email address"
-            })
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-
-        if(!isMatch){
+        if (!isUser) {
             return res.status(401).json({
-                success:false,
-                message:"Unauthorized access"
-            })
+                success: false,
+                message: "Invalid email or password",
+            });
         }
 
-        const token = signToken(user._id);
+        const isMatch = await bcrypt.compare(password, isUser.password);
 
-        res.cookie('token', token, {
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password",
+            });
+        }
+
+        const token = signToken(isUser._id);
+
+        res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_EV === "development" ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+            sameSite:
+                process.env.NODE_ENV === "production"
+                    ? "none"
+                    : "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
-        return res.json({
+        return res.status(200).json({
             success: true,
-            message: "user login successfully",
-        })
-
+            message: "User logged in successfully",
+        });
     } catch (error) {
-        console.error("Something went wrong in login", error)
+        console.error("Something went wrong in login:", error);
+
         return res.status(500).json({
-            success:false,
-            message: "Internal server error"
-        })
+            success: false,
+            message: "Internal server error",
+        });
     }
-
-
-}
+};
