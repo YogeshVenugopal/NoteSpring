@@ -162,7 +162,7 @@ export const sendVerifyOtp = async(req, res) => {
         const otp = String(Math.floor(100000 + Math.random() * 900000));
         
         isUser.verifyOtp = otp;
-        user.verifyOtpExpireAt = Date.now() + 5 * 60 * 60 * 1000
+        isUser.verifyOtpExpireAt = Date.now() + 5 * 60 * 60 * 1000
         
         await isUser.save();
 
@@ -176,7 +176,7 @@ export const sendVerifyOtp = async(req, res) => {
         await transporter.sendMail(mailOption);
 
         return res.json({
-          success: false,
+          success: true,
           message: "OTP send successfully"  
         })
 
@@ -216,7 +216,7 @@ export const verifyOtp = async(req, res) => {
             })
         }
 
-        if(isUser.verifyOtpExpiresAt < Date.now()){
+        if(isUser.verifyOtpExpiresAt > Date.now()){
             return res.json({
                 success:false,
                 message: "Expires OTP"
