@@ -242,3 +242,126 @@ export const verifyOtp = async(req, res) => {
         })
     }
 }
+
+export const isAuthenticated = async(req, res) => {
+    try {
+        return res.json({
+            success: true,
+            message: "user is authenticated successfully"
+        })
+    } catch (error) {
+        console.log(error);
+        return res.json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
+
+export const resetOtp = async(req, res) => {
+
+    const { email } = req.body;
+
+    if(!email){
+        return res.json({
+            message: false,
+            message: "Invalid email address"
+        })
+    }
+
+    try {
+
+        const isUser = await user.findOne({ email });
+        
+        if(!isUser){
+            return res.json({
+                success: false,
+                message: "Unauthorized access"
+            })
+        }
+
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+        isUser.resetOtp = otp;
+        isUser.resetOtpExpiresAt = Date.now() + 5 * 60 * 60 * 1000;
+
+        await isUser.save();
+
+        const mailOption = {
+            from : process.env.SENDER_EMAIL,
+            to : isUser.email,
+            subject : 'NoteSpring account password reset.',
+            text : `Your OTP for resetting your password is ${otp}. Use this OTP to proceed with resetting your password.`
+        }
+
+        await transporter.sendMail(mailOption);
+
+        return res.json({
+            success: true,
+            message: "Reset otp send to the user"
+        })
+        
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
+
+export const resetPassword = async(req, res) => {
+    const { email, otp, newPassword } = req.body;
+
+    if(!email || !otp || !newPassword){
+        return res.json({
+            success: false,
+            message: "All fields are required"
+        })
+    }
+
+    try {
+
+        const isUser = await user.findOne({ email });
+
+        if(!isUser){
+            return res.json({
+                success: false,
+                message: "Invalid email address"
+            })
+        }
+
+        if(isUser.resetOtp === "" || isUser.resetOtp !== otp){
+            return res.json({
+                success: false,
+                message: "Invalid OTP"
+            })
+        }
+
+        if(isUser.resetOtpExpiresAt < Date.now()){
+            return res.json({
+                success: false,
+                message: "OTP expires"
+            })
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        isUser.password = hashPassword;
+        isUser.resetOtp = "";
+        isUser.resetOtpExpiresAt = 0;
+
+
+        await isUser.save();
+
+        return res.json({
+            success: true,
+            message: "password changed successfull"
+        })
+        
+    } catch (error) {
+        console.log(error);
+        return res.json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
