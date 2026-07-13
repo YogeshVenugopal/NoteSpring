@@ -187,3 +187,58 @@ export const sendVerifyOtp = async(req, res) => {
         })
     }
 }
+
+export const verifyOtp = async(req, res) => {
+    const { userId, otp } = req.body;
+
+    if(!userId || !otp){
+        return res.status(400).json({
+            success: false,
+            message:"all fields are required"
+        })
+    }
+
+    try {
+
+        const isUser = await user.findById(userId);
+
+        if(!isUser){
+            return res.json({
+                success: false,
+                message: "user not found"
+            })
+        }
+
+        if(isUser.verifyOtp === "" || isUser.verifyOtp !== otp){
+            return res.json({
+                success:false,
+                message: "Invalid OTP"
+            })
+        }
+
+        if(isUser.verifyOtpExpiresAt < Date.now()){
+            return res.json({
+                success:false,
+                message: "Expires OTP"
+            })
+        }
+
+        isUser.isAccountVerified = true;
+
+        isUser.verifyOtp = "";
+        isUser.verifyOtpExpireAt = 0;
+
+        await isUser.save();
+
+        return res.json({
+            success: true,
+            message: "Account verified successfully"
+        })
+        
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
