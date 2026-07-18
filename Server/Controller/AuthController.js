@@ -264,7 +264,7 @@ export const resetOtp = async(req, res) => {
 
     if(!email){
         return res.json({
-            message: false,
+            success: false,
             message: "Invalid email address"
         })
     }
@@ -345,7 +345,7 @@ export const resetPassword = async(req, res) => {
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        isUser.password = hashPassword;
+        isUser.password = hashedPassword;
         isUser.resetOtp = "";
         isUser.resetOtpExpiresAt = 0;
 
