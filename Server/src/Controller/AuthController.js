@@ -37,28 +37,23 @@ export const register = async (req, res) => {
             password: hashedPassword
         })
 
-        const refreshToken = generateRefreshToken(user);
-        const accessToken = generateAccessToken(user);
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        user.refreshToken = refreshToken;
+        console.log("Generated OTP:", otp);
+
+        user.verifyOtp = otp;
+        user.verifyOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
         await user.save();
-
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        });
 
         await transporter.sendMail({
             from: process.env.SENDER_EMAIL,
-            to: email,
-            subject: "Welcome to the Note spring application",
-            text: `Hi ${username}, welcome to Notespring, your all-in-one application. Optimize your tasks and work efficiently here`
-        })
+            to: user.email,
+            subject: "Email Verification",
+            html: sendotp(otp)
+        });
 
-        return res.status(201).json({ message: "User registered successfully", token: accessToken });
-
+        return res.status(201).json({ message: "User registered successfully, Please verify your email" });
 
     } catch (error) {
         console.error(error);
@@ -70,7 +65,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(406).json({ message: "All fields are required" });
+        return res.status(400).json({ message: "All fields are required" });
     }
     try {
 
@@ -85,8 +80,12 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const refreshToken = generateRefreshToken(user);
-        const accessToken = generateAccessToken(user);
+        if (!user.isVerified) {
+            return res.status(401).json({ message: "Please verify your email before logging in" });
+        }
+
+        const refreshToken = generateRefreshToken(user._id);
+        const accessToken = generateAccessToken(user._id);
 
         user.refreshToken = refreshToken;
         await user.save();
@@ -135,50 +134,15 @@ export const logout = async (req, res) => {
     }
 }
 
-export const sendVerificationEmail = async (req, res) => {
-    const userId = req.user.userId;
-
-    try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (user.isVerified) {
-            return res.status(400).json({
-                message: "Email already verified"
-            });
-        }
-        const otp = String(Math.floor(100000 + Math.random() * 900000).toString());
-
-        user.verifyOtp = otp;
-        user.verifyOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-        await user.save();
-
-        await transporter.sendMail({
-            from: process.env.SENDER_EMAIL,
-            to: user.email,
-            subject: "Email Verification",
-            html: sendotp(otp)
-        });
-
-        return res.status(200).json({ message: "Verification email sent successfully" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-}
-
 export const verifyEmail = async (req, res) => {
-    const { otp } = req.body;
-    const userId = req.user.userId;
+    const { otp, email } = req.body;
     try {
-        const user = await User.findById(userId);
+        const user = await User.findOne({ email }).select('+verifyOtp +verifyOtpExpiresAt');
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        if (user.verifyOtp !== otp || !user.verifyOtpExpiresAt) {
+        if (user.verifyOtp !== otp) {
             return res.status(400).json({ message: "Invalid OTP" });
         }
 
@@ -198,7 +162,7 @@ export const verifyEmail = async (req, res) => {
     }
 }
 
-export const sendResetPassword = async(req, res) => {
+export const sendResetPassword = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
@@ -206,18 +170,18 @@ export const sendResetPassword = async(req, res) => {
     }
     try {
 
-        const user = await User.findOne({email});
+        const user = await User.findOne({ email });
 
-        if(!user){
-            return res.status(400).json({
-                message: "Invalid email address"
+        if (!user) {
+            return res.status(404).json({
+                message: "User with this email does not exist"
             })
         }
 
-        const otp = String(Math.floor(100000 + Math.random() * 900000).toString());
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        user.resetPasswordOtp = otp;
-        user.resetPasswordOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        user.resetOtp = otp;
+        user.resetOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
         await user.save();
 
         await transporter.sendMail({
@@ -230,7 +194,7 @@ export const sendResetPassword = async(req, res) => {
         return res.status(200).json({
             message: "Password reset email sent successfully"
         })
-        
+
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -239,7 +203,7 @@ export const sendResetPassword = async(req, res) => {
     }
 }
 
-export const resetPassword = async(req, res) => {
+export const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
 
     if (!email || !otp || !newPassword) {
@@ -247,24 +211,25 @@ export const resetPassword = async(req, res) => {
     }
 
     try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).select('+resetOtp +resetOtpExpiresAt');
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        if (user.resetPasswordOtp !== otp || !user.resetPasswordOtpExpiresAt) {
+        if (user.resetOtp !== otp || !user.resetOtpExpiresAt) {
             return res.status(400).json({ message: "Invalid OTP" });
         }
 
-        if (user.resetPasswordOtpExpiresAt < new Date()) {
+        if (user.resetOtpExpiresAt < new Date()) {
             return res.status(400).json({ message: "OTP has expired" });
         }
 
         const hashedPassword = await hashPassword(newPassword);
+        user.refreshToken = "";
         user.password = hashedPassword;
-        user.resetPasswordOtp = null;
-        user.resetPasswordOtpExpiresAt = null;
+        user.resetOtp = null;
+        user.resetOtpExpiresAt = null;
         await user.save();
 
         return res.status(200).json({ message: "Password reset successfully" });

@@ -20,21 +20,34 @@ export const validEmail = (email) => {
 }
 
 export const validPassword = (password) => {
-    return password.length > 5 && typeof password === 'string';
-}
-
+    return (
+        typeof password === "string" &&
+        password.length >= 6
+    );
+};
 export const hashPassword = (password) => {
     return bcrypt.hash(password, 10);
 } 
 
-export const generateAccessToken = (user) => {
-    return jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-}
+export const generateAccessToken = (userId) => {
+    return jwt.sign(
+        { userId },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRATION
+        }
+    );
+};
 
-export const generateRefreshToken = (user) => {
-    return jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
-}
-
+export const generateRefreshToken = (userId) => {
+    return jwt.sign(
+        { userId },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRATION
+        }
+    );
+};
 export const comparePassword = (password, hashedPassword) => {
     return bcrypt.compare(password, hashedPassword);
 }
