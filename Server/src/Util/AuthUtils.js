@@ -34,3 +34,7 @@ export const generateAccessToken = (user) => {
 export const generateRefreshToken = (user) => {
     return jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
 }
+
+export const comparePassword = (password, hashedPassword) => {
+    return bcrypt.compare(password, hashedPassword);
+}
