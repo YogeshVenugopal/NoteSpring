@@ -11,7 +11,7 @@ function LandingPage() {
             <div className='w-full min-h-screen dark:bg-stone-950 bg-gray-100 dark:text-white'>
                 <Navbar />
                 <div className='w-full flex items-center justify-center flex-col gap-4 min-h-[calc(100vh-100px)]'>
-                    <div className='w-[100px] h-[100px] shadow-sm rounded-2xl overflow-hidden'>
+                    <div className='w-[100px] h-[100px] shadow-sm dark:shadow-white rounded-2xl overflow-hidden flex items-center justify-center'>
                         <img src={logo} alt="Notespring Logo" className='w-full h-full object-cover'/>
                     </div>
                     <p className='font-bold text-[2rem] md:text-[3rem]'>Introducing to NoteSpring</p>
