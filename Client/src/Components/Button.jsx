@@ -1,10 +1,14 @@
 import React from 'react'
+import { motion } from 'framer-motion'
+
 
 function Button({children, className}) {
   return (
-    <div className={`px-4 py-2 bg-gray-950 text-white dark:bg-violet-900 rounded-[8px] cursor-pointer ${className}`}>
+    <motion.button
+    whileTap={{ scale: 0.95}} 
+    className={`px-4 py-2 bg-gray-950 text-white dark:bg-violet-900 rounded-[8px] cursor-pointer ${className}`}>
       {children}
-    </div>
+    </motion.button>
   )
 }
 
