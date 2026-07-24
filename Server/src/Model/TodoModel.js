@@ -47,3 +47,6 @@ const todoSchema = new mongoose.Schema({
     subTask:[subTaskSchema]
 
 })
+
+const Todo = mongoose.model('Todo', todoSchema);
+export default Todo;
