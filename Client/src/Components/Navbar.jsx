@@ -2,10 +2,17 @@ import React, { useState } from 'react'
 import Button from './Button'
 import { ListSortDescending } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom';
 
 function Navbar() {
     const[isOpen, setIsOpen] = useState(false);
-
+    const navigate = useNavigate();
+    const handleLogin = () => {
+        navigate('/login');
+    }
+    const handleRegister = () => {
+        navigate('/register')
+    }
     const handleMenuBar = () => {
         setIsOpen(!isOpen);
     }
@@ -17,8 +24,8 @@ function Navbar() {
             </div>
             
             <div className='items-center gap-5 md:gap-10 hidden md:flex'>
-                <p className='font-semibold dark:text-white cursor-pointer'>Login</p>
-                <Button className="font-semibold">Sign up</Button>
+                <p className='font-semibold dark:text-white cursor-pointer' onClick={handleLogin}>Login</p>
+                <Button className="font-semibold" onClick={handleRegister}>Sign up</Button>
             </div>
             <button className='md:hidden cursor-pointer' onClick={handleMenuBar}>
                 <ListSortDescending size={20}/>
@@ -30,8 +37,8 @@ function Navbar() {
                     animate={{height:"auto"}}
                     transition={{duration:0.4, ease:"easeInOut"}}
                     className='md:hidden w-[150px] rounded-2xl overflow-hidden shadow-sm absolute top-full right-0 flex flex-col gap-4 items-center p-4'>
-                        <p>login</p>    
-                        <Button className="w-full">Sign up</Button>                    
+                        <p onClick={handleLogin}>login</p>    
+                        <Button className="w-full" onClick={handleRegister}>Sign up</Button>                    
                     </motion.div>
                 )
             }
