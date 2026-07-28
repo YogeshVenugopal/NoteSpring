@@ -3,7 +3,7 @@ import * as authController from './auth.controller.js'
 import validate from '../../Middlewares/validate.js';
 import { loginSchema, registerSchema } from './auth.validation.js';
 import authRateLimit from '../../Middlewares/rateLimiter.js';
-import { authMiddleware } from '../../Middlewares/authMiddleware.js';
+import authMiddleware from '../../Middlewares/authMiddleware.js';
 
 
 const authRouter = express.Router();
