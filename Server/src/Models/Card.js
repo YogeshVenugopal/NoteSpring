@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const cardSchema = new Schema({
+const cardSchema = new mongoose.Schema({
     board: { type: mongoose.Schema.Types.ObjectId, ref: 'Board', required: true, index: true },
     column: { type: mongoose.Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },

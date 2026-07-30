@@ -1,15 +1,20 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import connectDB from "./Config/db.js";
-import errorHandler from "./Utils/errorHandler.js";
 import cookieParser from 'cookie-parser';
-import authRouter from "./Modules/auth/auth.routes.js";
-import requestLogger from "./Middlewares/requestLogger.js";
+
+import connectDB from "./Config/db.js";
+
+import errorHandler from "./Utils/errorHandler.js";
 import logger from "./Utils/logger.js";
+
+import authRouter from "./Modules/auth/auth.routes.js";
 import workspaceRoute from './Modules/workspace/workspace.routes.js';
 import cardRouter from './Modules/notes/notes.routes.js';
 import todoRouter from './Modules/todos/todo.routes.js';
+import projectRouter from './Modules/projects/projects.routes.js'
+
+import requestLogger from "./Middlewares/requestLogger.js";
 
 dotenv.config();
 
@@ -24,6 +29,7 @@ app.use('/auth', authRouter)
 app.use('/workspace', workspaceRoute)
 app.use('/card', cardRouter)
 app.use('/todo',todoRouter)
+app.use('/project', projectRouter);
 app.use(errorHandler);
 
 
