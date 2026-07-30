@@ -9,6 +9,8 @@ import requestLogger from "./Middlewares/requestLogger.js";
 import logger from "./Utils/logger.js";
 import workspaceRoute from './Modules/workspace/workspace.routes.js';
 import cardRouter from './Modules/notes/notes.routes.js';
+import todoRouter from './Modules/todos/todo.routes.js';
+
 dotenv.config();
 
 const app = express();
@@ -21,6 +23,7 @@ app.use(express.json());
 app.use('/auth', authRouter)
 app.use('/workspace', workspaceRoute)
 app.use('/card', cardRouter)
+app.use('/todo',todoRouter)
 app.use(errorHandler);
 
 
