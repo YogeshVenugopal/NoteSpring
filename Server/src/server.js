@@ -7,7 +7,8 @@ import cookieParser from 'cookie-parser';
 import authRouter from "./Modules/auth/auth.routes.js";
 import requestLogger from "./Middlewares/requestLogger.js";
 import logger from "./Utils/logger.js";
-
+import workspaceRoute from './Modules/workspace/workspace.routes.js';
+import cardRouter from './Modules/notes/notes.routes.js';
 dotenv.config();
 
 const app = express();
@@ -18,6 +19,8 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use('/auth', authRouter)
+app.use('/workspace', workspaceRoute)
+app.use('/card', cardRouter)
 app.use(errorHandler);
 
 

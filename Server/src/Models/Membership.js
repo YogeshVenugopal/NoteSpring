@@ -2,13 +2,13 @@ import mongoose from "mongoose";
 
 const membershipSchema = new mongoose.Schema({
     workspace: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Workspace',
         required: true,
         index: true
     },
     user: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         index: true
     },
@@ -29,7 +29,7 @@ const membershipSchema = new mongoose.Schema({
         default: 'invited'
     },
     invitedBy: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
     joinedAt: Date,

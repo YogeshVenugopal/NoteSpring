@@ -1,6 +1,6 @@
 import Membership from '../Models/Membership.js';
-import ApiError from '../utils/ApiError.js';
-import asyncHandler from '../utils/asyncHandler.js';
+import ApiError from '../Utils/ApiError.js';
+import asyncHandler from '../Utils/asyncHandler.js';
 
 const requireRole = (minRole = 'member') =>
   asyncHandler(async (req, res, next) => {

@@ -1,4 +1,4 @@
-import logger from '../utils/logger.js';
+import logger from '../Utils/logger.js';
 
 export const sendInviteEmail = async ({ to, workspaceId }) => {
   // TODO: replace with a real provider (Resend, SendGrid, Postmark, etc.) before shipping.
