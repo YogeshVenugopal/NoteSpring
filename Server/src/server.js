@@ -16,6 +16,7 @@ import todoRouter from './Modules/todos/todo.routes.js';
 import projectRouter from './Modules/projects/projects.routes.js'
 
 import requestLogger from "./Middlewares/requestLogger.js";
+import ApiError from "./Utils/ApiError.js";
 
 dotenv.config();
 
