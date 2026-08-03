@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, useEffect, useState } from "react";
 import { getUser } from "../Services/authService";
 
 
@@ -21,23 +21,23 @@ export function AuthProvider({ children }) {
         };
 
         fetchUser();
-
-        const login = (userData, accessToken) => {
-            localStorage.setItem('accessToken', accessToken);
-            setUser(userData);
-        };
-
-        const logout = () => {
-            localStorage.removeItem('accessToken');
-            setUser(null);
-        };
-
-        return (
-            <AuthContext.Provider value={{ user, loading, login, logout, isLoggedIn: !!user }}>
-                {children}
-            </AuthContext.Provider>
-        )
     }, []);
+
+    const login = (userData, accessToken) => {
+        localStorage.setItem('accessToken', accessToken);
+        setUser(userData);
+    };
+
+    const logout = () => {
+        localStorage.removeItem('accessToken');
+        setUser(null);
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, loading, login, logout, isLoggedIn: !!user }}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
 
 export default AuthContext;
