@@ -49,3 +49,10 @@ export const refresh = async(refreshToken) => {
 export const logout = async(userId) => {
     await User.findByIdAndUpdate(userId, {$inc: {refreshTokenVersion: 1}});
 }
+
+export const getUser = async(userId) => {
+    const user = await User.findById(userId);
+    if(!user) throw new ApiError(404, "User not found");
+
+    return user;
+}

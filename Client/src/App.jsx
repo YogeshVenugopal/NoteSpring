@@ -1,17 +1,12 @@
-import LandingPage from "./Pages/LandingPage"
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Register from "./Pages/Register";
-import Login from "./Pages/Login";
+import React from 'react'
+import Approute from './Routers/Approute'
+import { AuthProvider } from './Contexts/AuthContext'
 
-function App() {
+const App = () => {
   return (
-    <Router>
-        <Routes>
-            {/* <Route path='/' element={<LandingPage/>}/>
-            <Route path='/login' element={<Login/>}/>
-            <Route path='/register' element={<Register/>}/> */}
-        </Routes>
-    </Router>
+    <AuthProvider>
+      <Approute />
+    </AuthProvider>
   )
 }
 

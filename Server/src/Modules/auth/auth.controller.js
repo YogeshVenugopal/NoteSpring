@@ -37,3 +37,8 @@ export const logout = asyncHandler(async (req, res) => {
   res.clearCookie('refreshToken', { path: '/api/auth/refresh' });
   res.status(204).send();
 });
+
+export const getUser = asyncHandler(async (req, res) => {
+  const user = await authService.getUser(req.user.id);
+  res.json({ user: toPublicUser(user) });
+});
