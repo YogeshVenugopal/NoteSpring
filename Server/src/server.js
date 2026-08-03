@@ -27,7 +27,7 @@ const PORT = process.env.PORT || 5000;
 app.use(requestLogger);
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URI || "http://localhost:5173",
+  origin: process.env.CLIENT_URI || "http://localhost:3000",
   credentials: true,
 }));
 app.use(cookieParser());
